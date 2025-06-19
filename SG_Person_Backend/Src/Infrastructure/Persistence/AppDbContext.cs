@@ -33,6 +33,13 @@ namespace SG_Person_Backend.Src.Infrastructure.Persistence
 
                 entity.HasIndex(u => u.Username)
                     .IsUnique();
+
+                entity.Property(u => u.PasswordHash)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(u => u.IsActive)
+                    .IsRequired();
             });
 
 

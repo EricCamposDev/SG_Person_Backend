@@ -1,28 +1,26 @@
 ﻿using SG_Person_Backend.Src.Domain.Common;
+using System.Text.RegularExpressions;
 
 namespace SG_Person_Backend.Src.Domain.Entities
 {
     public class User : AuditableEntity
     {
-        public Guid? Id { get; private set; }
-        public string? Username { get; private set; }
-        public string? Email { get; private set; }
-        public string? PasswordHash { get; private set; }
-        public string? Role { get; private set; }
-        public bool? IsActive { get; private set; }
+        public Guid Id { get; private set; }
+        public string Username { get; private set; }
+        public string Email { get; private set; }
+        public string PasswordHash { get; private set; } // Alterado para PasswordHash
+        public bool IsActive { get; private set; } // Removido nullable
 
         // Construtor privado para EF Core
-        protected User() {
-        }
+        private User() { }
 
         // Factory method
         public static User Create(
             string username,
             string email,
-            string passwordHash,
-            string role)
+            string passwordHash) // Recebe o hash pronto
         {
-            Validate(username, email, role);
+            Validate(username, email);
 
             return new User
             {
@@ -30,29 +28,20 @@ namespace SG_Person_Backend.Src.Domain.Entities
                 Username = username.Trim(),
                 Email = email.ToLower().Trim(),
                 PasswordHash = passwordHash,
-                Role = role,
                 IsActive = true
             };
         }
 
-        private static void Validate(string username, string email, string role)
+        private static void Validate(string username, string email)
         {
             if (string.IsNullOrWhiteSpace(username))
-                throw new CannotUnloadAppDomainException("Username é obrigatório");
+                throw new ArgumentException("Username é obrigatório");
 
             if (string.IsNullOrWhiteSpace(email))
-                throw new CannotUnloadAppDomainException("Email é obrigatório");
+                throw new ArgumentException("Email é obrigatório");
 
-            //if (!EmailValidator.IsValid(email))
-            //    throw new CannotUnloadAppDomainException("Email inválido");
-
-            if (string.IsNullOrWhiteSpace(role))
-                throw new CannotUnloadAppDomainException("Role é obrigatória");
-        }
-
-        public void UpdateRole(string newRole)
-        {
-            Role = newRole;
+            if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                throw new ArgumentException("Email inválido");
         }
 
         public void Deactivate()
